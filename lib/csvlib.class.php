@@ -506,7 +506,9 @@ class csv_export_writer {
         }
         header('Expires: '. gmdate('D, d M Y H:i:s', 0) .' GMT');
         header("Content-Type: $this->mimetype\n");
-        header("Content-Disposition: attachment; filename=\"$this->filename\"");
+        // Fix garbled characters in the download file name.
+        $filename = rawurlencode($this->filename);
+        header('Content-Disposition: attachment; filename*=UTF-8\'\'' . $filename);
     }
 
     /**

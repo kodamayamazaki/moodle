@@ -130,14 +130,11 @@ class MoodleExcelWorkbook {
             header('Pragma: no-cache');
         }
 
-        if (core_useragent::is_ie() || core_useragent::is_edge()) {
-            $filename = rawurlencode($filename);
-        } else {
-            $filename = s($filename);
-        }
+        // Fix garbled characters in the download file name.
+        $encodename = rawurlencode(s($filename));
 
         header('Content-Type: '.$mimetype);
-        header('Content-Disposition: attachment;filename="'.$filename.'"');
+        header('Content-Disposition: attachment; filename*=UTF-8\'\'' . $encodename);
 
         $objwriter = IOFactory::createWriter($this->objspreadsheet, $this->type);
         $objwriter->save('php://output');

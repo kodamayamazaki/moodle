@@ -2386,7 +2386,8 @@ function send_temp_file($path, $filename, $pathisstring=false) {
     // If this file was requested from a form, then mark download as complete.
     \core_form\util::form_download_complete();
 
-    header('Content-Disposition: attachment; filename="'.$filename.'"');
+    // Fix garbled characters in the download file name.
+    header('Content-Disposition: attachment; filename*=UTF-8\'\'' . rawurlencode($filename));
     if (is_https()) { // HTTPS sites - watch out for IE! KB812935 and KB316431.
         header('Cache-Control: private, max-age=10, no-transform');
         header('Expires: '. gmdate('D, d M Y H:i:s', 0) .' GMT');
@@ -2533,10 +2534,8 @@ function send_file($path, $filename, $lifetime = null , $filter=0, $pathisstring
         $mimetype = get_mimetype_for_sending($filename);
     }
 
-    // if user is using IE, urlencode the filename so that multibyte file name will show up correctly on popup
-    if (core_useragent::is_ie() || core_useragent::is_edge()) {
-        $filename = rawurlencode($filename);
-    }
+    // Fix garbled characters in the download file name.
+    $encodename = rawurlencode($filename);
 
     // Make sure we force download of SVG files, unless the module explicitly allows them (eg within SCORM content).
     // This is for security reasons (https://digi.ninja/blog/svg_xss.php).
@@ -2545,7 +2544,7 @@ function send_file($path, $filename, $lifetime = null , $filter=0, $pathisstring
     }
 
     if ($forcedownload) {
-        header('Content-Disposition: attachment; filename="'.$filename.'"');
+        header('Content-Disposition: attachment; filename*=UTF-8\'\'' . $encodename);
 
         // If this file was requested from a form, then mark download as complete.
         \core_form\util::form_download_complete();
@@ -2553,7 +2552,7 @@ function send_file($path, $filename, $lifetime = null , $filter=0, $pathisstring
         // If this is an swf don't pass content-disposition with filename as this makes the flash player treat the file
         // as an upload and enforces security that may prevent the file from being loaded.
 
-        header('Content-Disposition: inline; filename="'.$filename.'"');
+        header('Content-Disposition: inline; filename*=UTF-8\'\'' . $encodename);
     }
 
     if ($lifetime > 0) {
